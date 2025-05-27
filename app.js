@@ -8,6 +8,7 @@ const path = require("path");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+app.use(express.urlencoded({ extended: true }));
 
 main()
   .then(() => console.log("Connection to MongoDB Successful!"))
@@ -25,6 +26,8 @@ app.get("/", (req, res) => {
   res.send("root is working");
 });
 
+//Index Route
+
 app.get("/listings", async (req, res) => {
   try {
     const allListings = await Listing.find({});
@@ -33,6 +36,17 @@ app.get("/listings", async (req, res) => {
     console.error(err);
   }
 });
+
+//Show Route
+app.get("/listings/:id", async (req, res) => {
+  try {
+    const listing = await Listing.findById(req.params.id);
+    res.render("listings/show", { listing });
+  } catch (err) {
+    console.error(err);
+  }
+});
+
 
 // app.get("/testListing" , async (req,res)=>{
 //   const sampleListing = new Listing({
