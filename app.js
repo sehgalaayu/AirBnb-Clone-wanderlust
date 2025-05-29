@@ -55,7 +55,14 @@ app.get("/listings/:id", async (req, res) => {
 
 //Create Route
 app.post("/listings", async (req, res) => {
-  let listing = req.body;
+  let newListing = new Listing(req.body.listing);
+  try {
+    await newListing.save();
+    res.redirect("/listings");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error saving listing");
+  }
 });
 
 
