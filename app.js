@@ -37,6 +37,11 @@ app.get("/listings", async (req, res) => {
   }
 });
 
+//New Route
+app.get("/listings/new", (req, res) => {
+  res.render("listings/new");
+}); 
+
 //Show Route
 app.get("/listings/:id", async (req, res) => {
   try {
@@ -45,6 +50,12 @@ app.get("/listings/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
   }
+});
+
+
+//Create Route
+app.post("/listings", async (req, res) => {
+  let listing = req.body;
 });
 
 
