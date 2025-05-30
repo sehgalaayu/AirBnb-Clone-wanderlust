@@ -52,6 +52,15 @@ app.get("/listings/:id", async (req, res) => {
   }
 });
 
+//Edit Route
+app.get("/listings/:id/edit", async (req, res) => {
+  try {
+    const listing = await Listing.findById(req.params.id);
+    res.render("listings/edit", { listing });
+  } catch (err) {
+    console.error(err);
+  }
+});
 
 //Create Route
 app.post("/listings", async (req, res) => {

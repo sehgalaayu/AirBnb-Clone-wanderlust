@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Your BNB</title>
+</head>
+<body>
+    <form >
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" name="listing[title]" value="<%= listing.title %>" required>
+        <br><br>
+
+        <label for="description">Description:</label><br>
+        <textarea id="description" name="listing[description]" value="<%= listing.description %>"required></textarea>
+        <br><br>
+
+        <label for="price">Price:</label><br>
+        <input type="number" id="price" name="listing[price]" value="<%= listing.price%>" required>
+        <br><br>
+
+        <label for="location">Location:</label><br>
+        <input type="text" id="location" name="listing[location]" value="<%= listing.location%>"required>
+        <br><br>
+
+        <label for="country">Country:</label><br>
+        <input type="text" id="country" name="listing[country]" value="<%= listing.country %>" required>
+        <br><br>
+
+        <button type="submit">OK</button>
+    </form>
+</body>
+</html>
