@@ -5,10 +5,12 @@ const PORT = 8080;
 const MONOGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 const Listing = require("./models/listing")
 const path = require("path");
+const methodOverride = require("method-override");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
 
 main()
   .then(() => console.log("Connection to MongoDB Successful!"))
@@ -27,7 +29,6 @@ app.get("/", (req, res) => {
 });
 
 //Index Route
-
 app.get("/listings", async (req, res) => {
   try {
     const allListings = await Listing.find({});
@@ -71,6 +72,28 @@ app.post("/listings", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("Error saving listing");
+  }
+});
+
+//Update Route
+app.put("/listings/:id", async (req, res) => {
+  try {
+    const updatedListing = await Listing.findByIdAndUpdate(req.params.id, req.body.listing, { new: true });
+    res.redirect(`/listings/${updatedListing._id}`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error updating listing");
+  }
+});
+
+//Delete Route
+app.delete("/listings/:id", async (req, res) => {
+  try {
+    await Listing.findByIdAndDelete(req.params.id);
+    res.redirect("/listings");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting listing");
   }
 });
 
