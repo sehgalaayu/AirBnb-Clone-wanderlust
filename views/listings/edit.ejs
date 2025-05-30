@@ -6,7 +6,7 @@
     <title>Edit Your BNB</title>
 </head>
 <body>
-    <form >
+    <form method="post" action="/listings/<%= listing._id %>?_method=PUT" >
         <label for="title">Title:</label><br>
         <input type="text" id="title" name="listing[title]" value="<%= listing.title %>" required>
         <br><br>
