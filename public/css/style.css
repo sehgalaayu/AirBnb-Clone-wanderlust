@@ -19,3 +19,16 @@ body{
 .f-info-links a:hover{
     text-decoration: underline;
 }
+.f-info-socials{
+    width: 100%;
+    font-size:1.2rem;
+}
+.f-info{
+    text-align: center;
+    height: 8rem;
+    background-color: #ebebeb;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: space-evenly;
+}
