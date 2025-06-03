@@ -12,3 +12,10 @@ body{
 .nav-link{
     color: #222 !important;
 }
+.f-info-links a{
+    text-decoration: none;
+    color: #222;
+}
+.f-info-links a:hover{
+    text-decoration: underline;
+}
