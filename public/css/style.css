@@ -19,9 +19,13 @@ body{
 .f-info-links a:hover{
     text-decoration: underline;
 }
-.f-info-socials{
+.f-info-links,
+.f-info-socials,
+.f-info-brand{
     width: 100%;
-    font-size:1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center
 }
 .f-info{
     text-align: center;
@@ -31,4 +35,8 @@ body{
     flex-wrap: wrap;
     justify-content: center;
     align-items: space-evenly;
+}
+.f-info-socials i{
+    font-size: 1.2rem;
+    margin-right:1rem;
 }
