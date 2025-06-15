@@ -6,7 +6,7 @@ const MONOGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 const Listing = require("./models/listing")
 const path = require("path");
 const methodOverride = require("method-override");
-const ejsMate = require("ejs-mate");
+const ejsMate = require("ejs-mate")
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
