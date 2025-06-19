@@ -2,30 +2,18 @@
 <body>
   <h1>All Listings</h1>
 
-  <!-- <form action="/listings/new" method="get">
-        <button>Create New Listing</button>
-    </form> -->
-
-
-    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1"></div>
+  <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
     <% for(let listing of allListings) { %>
-    <div class="card col" style="width: 20rem">
-      <img src="<%= listing.image %>" class="card-img-top" alt="listing_image" />
-      <div class="card-body">
-        <p class="card-text">
-          <%= listing.title%> <br>
-          &#8377;<%= listing.price.toLocaleString("en-IN") %> /night
-        </p>
+      <div class="card col" style="width: 20rem">
+        <img src="<%= listing.image.url %>" class="card-img-top" alt="listing_image" />
+        <div class="card-body">
+          <p class="card-text">
+            <%= listing.title %> <br>
+            &#8377;<%= listing.price.toLocaleString("en-IN") %> /night
+          </p>
+          <a href="/listings/<%= listing._id  %>" class="btn btn-primary">View Listing</a>
+        </div>
       </div>
-    </div>
-    <li><a href="/listings/<%= listing._id  %>"><%= listing.title %></a></li>
     <% } %>
-
-
-  <ul>
-    <% for(let listing of allListings) { %>
-
-    <li><a href="/listings/<%= listing._id  %>"><%= listing.title %></a></li>
-    <% } %>
-  </ul>
+  </div>
 </body>

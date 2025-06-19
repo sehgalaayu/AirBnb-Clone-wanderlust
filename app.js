@@ -15,6 +15,7 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "public")));
 
+
 main()
   .then(() => console.log("Connection to MongoDB Successful!"))
   .catch((err) => console.log(err));
