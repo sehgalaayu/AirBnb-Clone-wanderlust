@@ -1,6 +1,7 @@
 <% layout('layouts/boilerplate') -%>
 <div class="row">
   <div class="col-8 offset-2">
+    <br><br>
     <h1>Create a New Listing</h1>
 
     <form action="/listings" method="post">
@@ -17,8 +18,9 @@
       </div>
 
       <div class="mb-3">
-        <label for="description" class="form-label">Description:</label>
+        <label for="description" class="form-label" >Description:</label>
         <textarea
+        rows="4"
           id="description"
           name="listing[description]"
           class="form-control"
@@ -76,11 +78,12 @@
           required
         />
       </div>
+      <br>
 
       <div>
-        <button type="submit" class="btn btn-dark">Create Listing</button>
+        <button type="submit" class="btn btn-dark add-btn">Create Listing</button> 
       </div>
+      <br><br>
     </form>
-    <a href="/listings">Back to Listings</a>
   </div>
 </div>
