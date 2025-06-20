@@ -1,9 +1,6 @@
 <% layout('layouts/boilerplate') -%>
-<body>
-
-<div class="row"></div>
-
-
+<div class="row">
+<div class="col-8 offset-2">
     <h1>Create a New Listing</h1>
 
     <form action="/listings" method="post">
@@ -39,7 +36,9 @@
                 required>
         </div>
 
-        <div class="mb-3">
+        <div class="row">
+
+            <div class="mb-3 col-md-4">
             <label for="price" class="form-label">Price:</label>
             <input 
                 type="number" 
@@ -48,7 +47,21 @@
                 class="form-control" 
                 placeholder="Enter price in INR (₹)" 
                 required>
+            </div>
+
+            <div class="mb-3 col-md-8" >
+            <label for="country" class="form-label">Country:</label>
+            <input 
+                type="text" 
+                id="country" 
+                name="listing[country]" 
+                class="form-control" 
+                placeholder="Enter the country name" 
+                required>
+            </div>
         </div>
+
+        
 
         <div class="mb-3">
             <label for="location" class="form-label">Location:</label>
@@ -61,21 +74,12 @@
                 required>
         </div>
 
-        <div class="mb-3">
-            <label for="country" class="form-label">Country:</label>
-            <input 
-                type="text" 
-                id="country" 
-                name="listing[country]" 
-                class="form-control" 
-                placeholder="Enter the country name" 
-                required>
-        </div>
+       
 
         <div>
-            <button type="submit" class="btn btn-primary">Create Listing</button>
+            <button type="submit" class="btn btn-dark">Create Listing</button>
         </div>
     </form>
-
     <a href="/listings">Back to Listings</a>
-</body>
+</div>
+
