@@ -1,19 +1,46 @@
 <% layout('layouts/boilerplate') -%>
-<body>
-    <h1>Listing Details: </h1>
-    <ul>
-        <li><%= listing.title %></li>
-        <li><%= listing.description %></li>
-        <li> &#8377 <%= listing.price.toLocaleString("en-IN") %></li>
-        <li><%= listing.location %></li>
-        <li><%= listing.country %></li>
-        <button>
-            <a href="/listings/<%= listing._id %>/edit">Edit</a>
-        </button>
 
-        <form action="/listings/<%= listing._id%>?_method=Delete" method="post" >
-            <button>Delete</button>
+<body>
+  <div class="container mt-4">
+    <!-- Title and Location -->
+    <div class="row mb-3">
+      <div class="col-md-8 offset-md-2">
+        <h2 class="fw-bold"><%= listing.title %></h2>
+        <p class="text-muted"><%= listing.location %>, <%= listing.country %></p>
+      </div>
+    </div>
+
+    <!-- Image -->
+    <div class="row mb-4">
+      <div class="col-md-8 offset-md-2">
+        <img src="<%= listing.image.url %>" alt="listing-image" class="img-fluid rounded shadow-sm" />
+      </div>
+    </div>
+
+    <!-- Price and Description -->
+    <div class="row mb-4">
+      <div class="col-md-8 offset-md-2">
+        <h4 class="text-danger mb-3">₹ <%= listing.price.toLocaleString("en-IN") %></h4>
+        <p class="lead"><%= listing.description %></p>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row">
+      <div class="col-md-8 offset-md-2 d-flex justify-content-between">
+        <a href="/listings/<%= listing._id %>/edit" class="btn btn-outline-dark">Edit</a>
+
+        <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST">
+          <button class="btn btn-outline-danger">Delete</button>
         </form>
-        
-    </ul>
+      </div>
+    </div>
+
+    <!-- Back Link -->
+    <div class="row mt-4">
+      <div class="col-md-8 offset-md-2">
+        <a href="/listings" class="text-decoration-none">&larr; Back to Listings</a>
+      </div>
+    </div>
+  </div>
 </body>
