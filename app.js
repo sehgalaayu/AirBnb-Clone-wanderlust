@@ -2,18 +2,20 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const PORT = 8080;
-const MONOGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
+const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 const Listing = require("./models/listing")
 const path = require("path");
 const methodOverride = require("method-override");
-const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync");
+const ExpressError = require("./utils/ExpressError");
+const ejsMate = require('ejs-mate');
 
+
+app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
-app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "public")));
 
 
@@ -22,7 +24,7 @@ main()
   .catch((err) => console.log(err));
 
 async function main() {
-  await mongoose.connect(MONOGO_URL);
+  await mongoose.connect(MONGO_URL);
 }
 
 
@@ -34,7 +36,7 @@ app.get("/", (req, res) => {
 });
 
 //Index Route
-app.get("/listings", async (req, res, next) => {
+app.get("/listings", wrapAsync(async (req, res, next) => {
   try {
     const allListings = await Listing.find({});
     res.render("listings/index", { allListings });
@@ -42,7 +44,7 @@ app.get("/listings", async (req, res, next) => {
     console.error(err);
     next(err);
   }
-});
+}));
 
 //New Route
 app.get("/listings/new", (req, res) => {
@@ -50,24 +52,24 @@ app.get("/listings/new", (req, res) => {
 }); 
 
 //Show Route
-app.get("/listings/:id", async (req, res) => {
+app.get("/listings/:id", wrapAsync(async (req, res) => {
   try {
     const listing = await Listing.findById(req.params.id);
     res.render("listings/show", { listing });
   } catch (err) {
     console.error(err);
   }
-});
+}));
 
 //Edit Route
-app.get("/listings/:id/edit", async (req, res) => {
+app.get("/listings/:id/edit", wrapAsync(async (req, res) => {
   try {
     const listing = await Listing.findById(req.params.id);
     res.render("listings/edit", { listing });
   } catch (err) {
     console.error(err);
   }
-});
+}));
 
 //Create Route
 app.post("/listings", wrapAsync (async (req, res, next) => {
@@ -77,7 +79,7 @@ app.post("/listings", wrapAsync (async (req, res, next) => {
 }));
 
 //Update Route
-app.put("/listings/:id", async (req, res) => {
+app.put("/listings/:id", wrapAsync(async (req, res) => {
   try {
     const updatedListing = await Listing.findByIdAndUpdate(req.params.id, req.body.listing, { new: true });
     res.redirect(`/listings/${updatedListing._id}`);
@@ -85,10 +87,10 @@ app.put("/listings/:id", async (req, res) => {
     console.error(err);
     res.status(500).send("Error updating listing");
   }
-});
+}));
 
 //Delete Route
-app.delete("/listings/:id", async (req, res) => {
+app.delete("/listings/:id", wrapAsync(async (req, res) => {
   try {
     await Listing.findByIdAndDelete(req.params.id);
     res.redirect("/listings");
@@ -96,11 +98,15 @@ app.delete("/listings/:id", async (req, res) => {
     console.error(err);
     res.status(500).send("Error deleting listing");
   }
+}));
+
+app.all("*", (req, res ,next) => {
+  next(new ExpressError(404, "Page Not Found"));
 });
 
 
 //Error Handler
-app.use((req, res, next) => {
-  res.send("Something went wrong! Please try again later.");
-  next();
+app.use((err, req, res, next) => {
+  let { statusCode = 500, message = "Something went wrong" } = err;
+  res.status(statusCode).send(message);
 });
