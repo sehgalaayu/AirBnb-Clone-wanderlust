@@ -7,6 +7,7 @@ const Listing = require("./models/listing")
 const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
+const wrapAsync = require("./utils/wrapAsync");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -33,12 +34,13 @@ app.get("/", (req, res) => {
 });
 
 //Index Route
-app.get("/listings", async (req, res) => {
+app.get("/listings", async (req, res, next) => {
   try {
     const allListings = await Listing.find({});
     res.render("listings/index", { allListings });
   } catch (err) {
     console.error(err);
+    next(err);
   }
 });
 
@@ -68,16 +70,11 @@ app.get("/listings/:id/edit", async (req, res) => {
 });
 
 //Create Route
-app.post("/listings", async (req, res) => {
+app.post("/listings", wrapAsync (async (req, res, next) => {
   let newListing = new Listing(req.body.listing);
-  try {
     await newListing.save();
     res.redirect("/listings");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error saving listing");
-  }
-});
+}));
 
 //Update Route
 app.put("/listings/:id", async (req, res) => {
@@ -102,16 +99,8 @@ app.delete("/listings/:id", async (req, res) => {
 });
 
 
-// app.get("/testListing" , async (req,res)=>{
-//   const sampleListing = new Listing({
-//     title: "Luxury Fort In Edinburgh, Scotland",
-//     description: "Very luxury located at countryside Scotland",
-//     price: 150,
-//     location: "Scotland",
-//     country : "UK"
-//   })
-
-//   await sampleListing.save();
-//   console.log("Sample Listing was saved.")
-//   res.send("suceessful testing.")
-// })
+//Error Handler
+app.use((req, res, next) => {
+  res.send("Something went wrong! Please try again later.");
+  next();
+});
