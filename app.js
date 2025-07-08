@@ -10,6 +10,8 @@ const wrapAsync = require("./utils/wrapAsync");
 const ExpressError = require("./utils/ExpressError");
 const ejsMate = require("ejs-mate");
 const { listingSchema } = require("./schema.js");
+const Review = require("./models/reviews.js");
+const { send } = require("process");
 
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
@@ -131,6 +133,25 @@ app.delete(
     }
   })
 );
+
+//Reviews
+//Post route
+app.post("/listings/:id/reviews", async (req, res, next) => {
+  try {
+    let listing = await Listing.findById(req.params.id);
+    if (!listing) {
+      return res.status(404).json({ error: "Listing not found" });
+    }
+    let newReview = new Review(req.body.review);
+    await newReview.save();
+    listing.reviews.push(newReview._id);
+    await listing.save();
+
+    res.json({ message: "Review Submitted" });
+  } catch (err) {
+    next(err); // Passes error to your error handler middleware
+  }
+});
 
 app.all("*", (req, res, next) => {
   next(new ExpressError(404, "Page Not Found"));
