@@ -35,9 +35,10 @@ app.get("/", (req, res) => {
 // Middleware to validate listing data
 const validateListing = (req, res, next) => {
   let {err} = listingSchema.validate(req.body);
-  console.log(result);
-  if (result.error) {
-    throw new ExpressError(400, result.error);
+  console.log(error);
+  if (error) {
+    let errorMessage = error.details.map((el) => el.message).join(", ");
+    throw new ExpressError(400, errorMessage);
   }else{
     next();
   }
@@ -101,7 +102,7 @@ app.post(
 
 //Update Route
 app.put(
-  "/listings/:id",
+  "/listings/:id", validateListing,
   wrapAsync(async (req, res) => {
     try {
       const updatedListing = await Listing.findByIdAndUpdate(

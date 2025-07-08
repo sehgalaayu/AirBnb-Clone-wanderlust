@@ -1,4 +1,5 @@
 const moongose = require("mongoose");
+const reviews = require("./reviews");
 const Schema = moongose.Schema;
 
 const listingSchema = new Schema({
@@ -21,6 +22,11 @@ const listingSchema = new Schema({
   location: String,
 
   country: String,
+
+  reviews: [{
+    type : Schema.Types.ObjectId,
+    ref : "reviews"
+  }]
 });
 
 const Listing = moongose.model("Listing", listingSchema);
