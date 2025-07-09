@@ -9,9 +9,9 @@ const methodOverride = require("method-override");
 const wrapAsync = require("./utils/wrapAsync");
 const ExpressError = require("./utils/ExpressError");
 const ejsMate = require("ejs-mate");
-const { listingSchema } = require("./schema.js");
+const { listingSchema , reviewSchema} = require("./schema.js");
 const Review = require("./models/reviews.js");
-const { send } = require("process");
+
 
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
@@ -36,7 +36,18 @@ app.get("/", (req, res) => {
 
 // Middleware to validate listing data
 const validateListing = (req, res, next) => {
-  let {err} = listingSchema.validate(req.body);
+  let {error} = listingSchema.validate(req.body);
+  console.log(error);
+  if (error) {
+    let errorMessage = error.details.map((el) => el.message).join(", ");
+    throw new ExpressError(400, errorMessage);
+  }else{
+    next();
+  }
+};
+// Middleware to validate review data
+const validateReview = (req, res, next) => {
+  let {error} = reviewSchema.validate(req.body);
   console.log(error);
   if (error) {
     let errorMessage = error.details.map((el) => el.message).join(", ");
@@ -70,7 +81,7 @@ app.get(
   "/listings/:id",
   wrapAsync(async (req, res) => {
     try {
-      const listing = await Listing.findById(req.params.id);
+      const listing = await Listing.findById(req.params.id).populate('reviews');
       res.render("listings/show", { listing });
     } catch (err) {
       console.error(err);
@@ -136,7 +147,7 @@ app.delete(
 
 //Reviews
 //Post route
-app.post("/listings/:id/reviews", async (req, res, next) => {
+app.post("/listings/:id/reviews", validateReview, wrapAsync(async (req, res, next) => {
   try {
     let listing = await Listing.findById(req.params.id);
     if (!listing) {
@@ -147,11 +158,11 @@ app.post("/listings/:id/reviews", async (req, res, next) => {
     listing.reviews.push(newReview._id);
     await listing.save();
 
-    res.json({ message: "Review Submitted" });
+    res.redirect(`/listings/${listing._id}`);
   } catch (err) {
     next(err); // Passes error to your error handler middleware
   }
-});
+}));
 
 app.all("*", (req, res, next) => {
   next(new ExpressError(404, "Page Not Found"));

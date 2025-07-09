@@ -36,12 +36,8 @@
       </div>
     </div>
 
-    <!-- Back Link -->
-    <div class="row mt-4">
-      <div class="col-md-8 offset-md-2">
-        <a href="/listings" class="text-decoration-none">&larr; Back to Listings</a>
-      </div>
-    </div>
+    
+    &nbsp;
     
     <div class= "col-md-8 offset-md-2 mb-3">
       <h4>Leave a review</h4>
@@ -57,8 +53,29 @@
             Please provide a comment.
           </div>
         </div>
-        <button type="submit">Submit</button>
+        <button type="submit" class="btn btn-dark add-btn">Submit</button>
       </form>
+    </div>
+    <div class="col-md-8 offset-md-2">
+      <h4>Reviews</h4>
+      <% if (listing.reviews.length > 0) { %>
+        <ul class="list-group">
+          <% for (let review of listing.reviews) { %>
+            <li class="list-group-item">
+              <strong>Rating:</strong> <%= review.rating %> <br>
+              <strong>Comment:</strong> <%= review.comment %>
+            </li>
+          <% } %>
+        </ul>
+      <% } else { %>
+        <p>No reviews yet.</p>
+      <% } %>
+    </div>
+    <!-- Back Link -->
+    <div class="row mt-4">
+      <div class="col-md-8 offset-md-2">
+        <a href="/listings" class="text-decoration-none">&larr; Back to Listings</a>
+      </div>
     </div>
   </div>
 </body>
