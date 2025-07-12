@@ -29,5 +29,15 @@ const listingSchema = new Schema({
   }]
 });
 
+listingSchema.post("findOneAndDelete", async (listing) => {
+  if (listing) {
+    await reviews.deleteMany({
+      _id: {
+        $in: listing.reviews,
+      },
+    });
+  }
+}); 
+
 const Listing = moongose.model("Listing", listingSchema);
 module.exports = Listing;

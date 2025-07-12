@@ -160,7 +160,25 @@ app.post("/listings/:id/reviews", validateReview, wrapAsync(async (req, res, nex
 
     res.redirect(`/listings/${listing._id}`);
   } catch (err) {
-    next(err); // Passes error to your error handler middleware
+    next(err); 
+  }
+}));
+
+//Review Delete Route
+app.post("/listings/:id/reviews/:reviewId", wrapAsync(async (req,res) => {
+  try {
+    const { id, reviewId } = req.params;
+    const listing = await Listing.findById(id);
+    if (!listing) {
+      return res.status(404).json({ error: "Listing not found" });
+    }
+    await Review.findByIdAndDelete(reviewId);
+    listing.reviews = listing.reviews.filter((review) => review.toString() !== reviewId);
+    await listing.save();
+    res.redirect(`/listings/${listing._id}`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting review");
   }
 }));
 
