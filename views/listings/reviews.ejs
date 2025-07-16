@@ -1,0 +1,55 @@
+<% layout('layouts/boilerplate') -%>
+<body>
+  <h1>Reviews for <%= listing.title %></h1>
+  <div class="col-md-8 offset-md-2">
+    <h4>Reviews</h4>
+    <% if (listing.reviews.length > 0) { %>
+      <div class="row row-cols-1 row-cols-md-2 g-4">
+        <% const randomNames = ["Harsh", "Tushar", "Honey", "Rajni", "Deepak", "Priyanshi", "Sachin", "Aayu" ,"Ritika", "Simran" ,"Parth"]; %>
+        <% function getRandomName() { return randomNames[Math.floor(Math.random() * randomNames.length)]; } %>
+        <% function getMembershipDuration() { const years = ["2 months", "1 year", "2 years", "6 months"]; return years[Math.floor(Math.random() * years.length)]; } %>
+    
+        <% listing.reviews.forEach(function(review) { %>
+          <% const reviewer = getRandomName(); %>
+          <% const memberFor = getMembershipDuration(); %>
+          <div class="col">
+            <div class="d-flex align-items-center mb-2">
+              <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3" style="width:48px; height:48px; font-size:1.5rem;">
+                <%= reviewer[0] %>
+              </div>
+              <div>
+                <div class="fw-bold"><%= reviewer %></div>
+                <div class="text-muted small"><%= memberFor %> on Airbnb</div>
+              </div>
+            </div>
+            <div class="mb-2">
+              <span class="text-warning">
+                <% for(let i=0; i<review.rating; i++) { %>
+                  &#9733;
+                <% } %>
+                <% for(let i=review.rating; i<5; i++) { %>
+                  <span class="text-secondary">&#9733;</span>
+                <% } %>
+              </span>
+              <span class="text-muted small ms-2"><%= review.createdAt.toDateString() %></span>
+            </div>
+            <div>
+              <p class="mb-0"><%= review.comment %></p>
+              <form action="/listings/<%= listing.id %>/reviews/<%= review.id %>" method="post">
+                <button type="submit" class="btn btn-link text-danger p-0">Delete</button>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <p>No reviews yet.</p>
+    <% } %>
+  </div>
+  <!-- Back Link -->
+  <div class="row mt-4">
+    <div class="col-md-8 offset-md-2">
+      <a href="/listings/<%= listing.id %>" class="text-decoration-none">&larr; Back to Listing</a>
+    </div>
+  </div>
+</body> 

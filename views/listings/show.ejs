@@ -1,0 +1,115 @@
+<% layout('layouts/boilerplate') -%>
+
+<body>
+  <div class="container mt-4">
+    <!-- Title and Location -->
+    <div class="row mb-3">
+      <div class="col-md-8 offset-md-2">
+        <h2 class="fw-bold"><%= listing.title %></h2>
+        <p class="text-muted"><%= listing.location %>, <%= listing.country %></p>
+      </div>
+    </div>
+
+    <!-- Image -->
+    <div class="row mb-4">
+      <div class="col-md-8 offset-md-2">
+        <img src="<%= listing.image.url %>" alt="listing-image" class="img-fluid rounded shadow-sm" />
+      </div>
+    </div>
+
+    <!-- Price and Description -->
+    <div class="row mb-4">
+      <div class="col-md-8 offset-md-2">
+        <h4 class="text-danger mb-3">₹ <%= listing.price.toLocaleString("en-IN") %></h4>
+        <p class="lead"><%= listing.description %></p>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row">
+      <div class="col-md-8 offset-md-2 d-flex justify-content-between">
+        <a href="/listings/<%= listing._id %>/edit" class="btn btn-outline-dark">Edit</a>
+
+        <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST">
+          <button class="btn btn-outline-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+
+    
+    &nbsp;
+    
+    <div class= "col-md-8 offset-md-2 mb-3">
+      <h4>Leave a review</h4>
+      <form action="/listings/<%= listing.id %>/reviews" method="post" novalidate class="needs-validation">
+        <div class="mb-3 mt-3">
+          <label for="rating" class="form-label">Review</label>
+          <input type="range" class="form-range" min="1" max="5" name="review[rating]" id="rating">
+        </div>
+        <div class="mb-3 mt-3">
+          <label for="comment" class="form-label">Comments</label>
+          <textarea class="form-control" name="review[comment]" id="comment" cols="10" rows="5" required></textarea>
+          <div class="invalid-feedback">
+            Please provide a comment.
+          </div>
+        </div>
+        <button type="submit" class="btn btn-dark add-btn">Submit</button>
+      </form>
+    </div>
+    <div class="col-md-8 offset-md-2">
+      <h4>Reviews</h4>
+      <% if (listing.reviews.length > 0) { %>
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+          <% const randomNames = ["Harsh", "Tushar", "Honey", "Rajni", "Deepak", "Priyanshi", "Sachin", "Aayu" ,"Ritika", "Simran" ,"Parth"]; %>
+          <% function getRandomName() { return randomNames[Math.floor(Math.random() * randomNames.length)]; } %>
+          <% function getMembershipDuration() { const years = ["2 months", "1 year", "2 years", "6 months"]; return years[Math.floor(Math.random() * years.length)]; } %>
+      
+          <% listing.reviews.forEach(function(review) { %>
+            <% const reviewer = getRandomName(); %>
+            <% const memberFor = getMembershipDuration(); %>
+            <div class="col">
+              <div class="card h-100 p-3 border-0 shadow-sm">
+                <div class="d-flex align-items-center mb-2">
+                  <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3" style="width:48px; height:48px; font-size:1.5rem;">
+                    <%= reviewer[0] %>
+                  </div>
+                  <div>
+                    <div class="fw-bold"><%= reviewer %></div>
+                    <div class="text-muted small"><%= memberFor %> on Airbnb</div>
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <span class="text-warning">
+                    <% for(let i=0; i<review.rating; i++) { %>
+                      &#9733;
+                    <% } %>
+                    <% for(let i=review.rating; i<5; i++) { %>
+                      <span class="text-secondary">&#9733;</span>
+                    <% } %>
+                  </span>
+                  <span class="text-muted small ms-2"><%= review.createdAt.toDateString() %></span>
+                </div>
+                <div>
+                  <p class="mb-0"><%= review.comment %></p>
+                 <form action="/listings/<%= listing.id %>/reviews/<%= review.id %>" method="post">
+                    <button type="submit" class="btn btn-link text-danger p-0">Delete</button>
+                 </form>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <p>No reviews yet.</p>
+      <% } %>
+      </div>
+      
+
+    <!-- Back Link -->
+    <div class="row mt-4">
+      <div class="col-md-8 offset-md-2">
+        <a href="/listings" class="text-decoration-none">&larr; Back to Listings</a>
+      </div>
+    </div>
+  </div>
+</body>
