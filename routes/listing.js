@@ -4,6 +4,7 @@ const wrapAsync = require("../utils/wrapAsync");
 const Listing = require("../models/listing");
 const { listingSchema } = require("../schema.js");
 const ExpressError = require("../utils/ExpressError");
+const mongoose = require("mongoose");
 
 // Middleware to validate listing data
 const validateListing = (req, res, next) => {
@@ -35,9 +36,15 @@ router.get("/new", (req, res) => {
   res.render("./listings/new");
 });
 
-//Show Route
+//Show Route with ObjectId validation
 router.get(
   "/:id",
+  (req, res, next) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).render("error.ejs", { message: "Listing not found" });
+    }
+    next();
+  },
   wrapAsync(async (req, res) => {
     try {
       const listing = await Listing.findById(req.params.id).populate("reviews");

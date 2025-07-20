@@ -9,6 +9,7 @@ const ExpressError = require("./utils/ExpressError");
 const ejsMate = require("ejs-mate");
 const listingRoutes = require("./routes/listing");
 const reviewRoutes = require("./routes/reviews");
+const userRoutes = require("./routes/user.js");
 const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
@@ -64,6 +65,7 @@ app.use((req, res, next) => {
 
 app.use("/listings", listingRoutes);
 app.use("/", reviewRoutes);
+app.use("/", userRoutes);
 
 app.all("*", (req, res, next) => {
   next(new ExpressError(404, "Page Not Found"));

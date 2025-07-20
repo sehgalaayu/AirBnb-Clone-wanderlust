@@ -10,5 +10,5 @@ const userSchema = new Schema({
   }, //username and password(hashed and salted) are automatically added by passport-local-monggose so we are not adding their fields here
 });
 
-User.plugin(passportLocalMongoose);
+userSchema.plugin(passportLocalMongoose);
 module.exports = mongoose.model("User", userSchema);
