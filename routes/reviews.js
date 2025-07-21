@@ -5,6 +5,29 @@ const Listing = require("../models/listing.js");
 const { reviewSchema } = require("../schema.js");
 const ExpressError = require("../utils/ExpressError.js");
 const Review = require("../models/reviews.js");
+const passport = require("passport");
+
+function isLoggedIn(req, res, next) {
+  if (!req.isAuthenticated()) {
+    req.flash("error", "You must be signed in");
+    return res.redirect("/login");
+  }
+  next();
+}
+
+async function isReviewAuthor(req, res, next) {
+  const { id, reviewId } = req.params;
+  const review = await Review.findById(reviewId);
+  if (!review) {
+    req.flash("error", "Review not found!");
+    return res.redirect(`/listings/${id}`);
+  }
+  if (!review.author || !review.author.equals(req.user._id)) {
+    req.flash("error", "You do not have permission to perform this action.");
+    return res.redirect(`/listings/${id}`);
+  }
+  next();
+}
 
 // Middleware to validate review data
 const validateReview = (req, res, next) => {
@@ -22,19 +45,21 @@ const validateReview = (req, res, next) => {
 //Post route
 router.post(
   "/listings/:id/reviews",
+  isLoggedIn,
   validateReview,
   wrapAsync(async (req, res, next) => {
     try {
-      let listing = await Listing.findById(req.params.id);
-      if (!listing) {
-        return res.status(404).json({ error: "Listing not found" });
-      }
-      let newReview = new Review(req.body.review);
+      const { id } = req.params;
+      const newReview = new Review(req.body.review);
+      newReview.author = req.user._id;
       await newReview.save();
-      listing.reviews.push(newReview._id);
-      await listing.save();
+
+      await Listing.findByIdAndUpdate(id, {
+        $push: { reviews: newReview._id },
+      });
+
       req.flash("success", "Review posted!");
-      res.redirect(`/listings/${listing._id}`);
+      res.redirect(`/listings/${id}`);
     } catch (err) {
       next(err);
     }
@@ -42,26 +67,16 @@ router.post(
 );
 
 //Review Delete Route
-router.post(
+router.delete(
   "/listings/:id/reviews/:reviewId",
+  isLoggedIn,
+  wrapAsync(isReviewAuthor),
   wrapAsync(async (req, res) => {
-    try {
-      const { id, reviewId } = req.params;
-      const listing = await Listing.findById(id);
-      if (!listing) {
-        return res.status(404).json({ error: "Listing not found" });
-      }
-      await Review.findByIdAndDelete(reviewId);
-      listing.reviews = listing.reviews.filter(
-        (review) => review.toString() !== reviewId
-      );
-      await listing.save();
-      req.flash("success", "Review deleted!");
-      res.redirect(`/listings/${listing._id}`);
-    } catch (err) {
-      console.error(err);
-      res.status(500).send("Error deleting review");
-    }
+    const { id, reviewId } = req.params;
+    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+    await Review.findByIdAndDelete(reviewId);
+    req.flash("success", "Review deleted!");
+    res.redirect(`/listings/${id}`);
   })
 );
 

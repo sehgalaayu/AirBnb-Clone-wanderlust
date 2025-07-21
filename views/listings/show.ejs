@@ -28,11 +28,12 @@
     <!-- Action Buttons -->
     <div class="row">
       <div class="col-md-8 offset-md-2 d-flex justify-content-between">
-        <a href="/listings/<%= listing._id %>/edit" class="btn btn-outline-dark">Edit</a>
-
-        <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST">
-          <button class="btn btn-outline-danger">Delete</button>
-        </form>
+        <% if (user && listing.owner && user._id.toString() === listing.owner._id.toString()) { %>
+          <a href="/listings/<%= listing._id %>/edit" class="btn btn-warning">Edit</a>
+          <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST" style="display:inline;">
+            <button class="btn btn-danger">Delete</button>
+          </form>
+        <% } %>
       </div>
     </div>
 
@@ -91,7 +92,7 @@
                 </div>
                 <div>
                   <p class="mb-0"><%= review.comment %></p>
-                 <form action="/listings/<%= listing.id %>/reviews/<%= review.id %>" method="post">
+                 <form action="/listings/<%= listing.id %>/reviews/<%= review.id %>?_method=DELETE" method="POST" style="display:inline;">
                     <button type="submit" class="btn btn-link text-danger p-0">Delete</button>
                  </form>
                 </div>
