@@ -1,22 +1,27 @@
-const Joi = require('joi');
+const { z } = require("zod");
 
-module.exports.listingSchema = Joi.object({
-    listing: Joi.object({
-        title: Joi.string().required(),
-        description: Joi.string().required(),
-        price: Joi.number().min(0).required(),
-        location: Joi.string().required(),
-        country: Joi.string().required(),
-        image: Joi.object({
-            url: Joi.string().allow("", null),
-            filename: Joi.string().allow("", null)
-        }).optional()
-    }).required()
+const listingSchemaZod = z.object({
+  listing: z.object({
+    title: z.string().min(1, "Title is required"),
+    description: z.string().min(1, "Description is required"),
+    price: z.preprocess((val) => Number(val), z.number().min(0, "Price must be positive")),
+    location: z.string().min(1, "Location is required"),
+    country: z.string().min(1, "Country is required"),
+    image: z.object({
+      url: z.string().optional().nullable(),
+      filename: z.string().optional().nullable(),
+    }).optional(),
+  })
 });
 
-module.exports.reviewSchema = Joi.object({
-    review: Joi.object({
-        rating: Joi.number().min(1).max(5).required(),
-        comment: Joi.string().required()
-    }).required()
+const reviewSchemaZod = z.object({
+  review: z.object({
+    rating: z.preprocess((val) => Number(val), z.number().min(1).max(5)),
+    comment: z.string().min(1, "Comment is required"),
+  })
 });
+
+module.exports = {
+  listingSchemaZod,
+  reviewSchemaZod,
+};

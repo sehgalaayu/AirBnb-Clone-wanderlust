@@ -2,17 +2,26 @@ const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync.js");
 const Listing = require("../models/listing.js");
-const { reviewSchema } = require("../schema.js");
+const { reviewSchemaZod } = require("../schema.js");
 const ExpressError = require("../utils/ExpressError.js");
 const Review = require("../models/reviews.js");
-const passport = require("passport");
+const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
 function isLoggedIn(req, res, next) {
-  if (!req.isAuthenticated()) {
+  const token = req.cookies.token;
+  if (!token) {
     req.flash("error", "You must be signed in");
     return res.redirect("/login");
   }
-  next();
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    req.flash("error", "Invalid or expired token. Please log in again.");
+    return res.redirect("/login");
+  }
 }
 
 async function isReviewAuthor(req, res, next) {
@@ -31,13 +40,12 @@ async function isReviewAuthor(req, res, next) {
 
 // Middleware to validate review data
 const validateReview = (req, res, next) => {
-  let { error } = reviewSchema.validate(req.body);
-  console.log(error);
-  if (error) {
-    let errorMessage = error.details.map((el) => el.message).join(", ");
-    throw new ExpressError(400, errorMessage);
-  } else {
+  try {
+    reviewSchemaZod.parse(req.body);
     next();
+  } catch (err) {
+    const errorMessage = err.errors && err.errors.length > 0 ? err.errors[0].message : "Invalid data";
+    throw new ExpressError(400, errorMessage);
   }
 };
 

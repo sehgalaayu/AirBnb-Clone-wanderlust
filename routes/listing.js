@@ -2,17 +2,26 @@ const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync");
 const Listing = require("../models/listing");
-const { listingSchema } = require("../schema.js");
+const { listingSchemaZod } = require("../schema.js");
 const ExpressError = require("../utils/ExpressError");
 const mongoose = require("mongoose");
-const passport = require("passport");
+const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
 function isLoggedIn(req, res, next) {
-  if (!req.isAuthenticated()) {
+  const token = req.cookies.token;
+  if (!token) {
     req.flash("error", "You must be signed in");
     return res.redirect("/login");
   }
-  next();
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    req.flash("error", "Invalid or expired token. Please log in again.");
+    return res.redirect("/login");
+  }
 }
 
 async function isOwner(req, res, next) {
@@ -22,7 +31,7 @@ async function isOwner(req, res, next) {
     req.flash("error", "Listing not found");
     return res.redirect("/listings");
   }
-  if (!listing.owner.equals(req.user._id)) {
+  if (!listing.owner.equals(req.user.id)) {
     req.flash("error", "You do not have permission to do that");
     return res.redirect(`/listings/${id}`);
   }
@@ -31,13 +40,12 @@ async function isOwner(req, res, next) {
 
 // Middleware to validate listing data
 const validateListing = (req, res, next) => {
-  let { error } = listingSchema.validate(req.body);
-  console.log(error);
-  if (error) {
-    let errorMessage = error.details.map((el) => el.message).join(", ");
-    throw new ExpressError(400, errorMessage);
-  } else {
+  try {
+    listingSchemaZod.parse(req.body);
     next();
+  } catch (err) {
+    const errorMessage = err.errors && err.errors.length > 0 ? err.errors[0].message : "Invalid data";
+    throw new ExpressError(400, errorMessage);
   }
 };
 
@@ -80,7 +88,7 @@ router.get(
         req.flash("error", "Listing you requested for does not exist");
         res.redirect("/listings");
       }
-      res.render("listings/show", { listing, user: req.user });
+      res.render("listings/show", { listing });
     } catch (err) {
       console.error(err);
     }
@@ -113,7 +121,7 @@ router.post(
   validateListing,
   wrapAsync(async (req, res, next) => {
     const newListing = new Listing(req.body.listing);
-    newListing.owner = req.user._id;
+    newListing.owner = req.user.id;
     await newListing.save();
     req.flash("success", "Listing Created successfully!");
     res.redirect("/listings");

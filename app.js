@@ -10,11 +10,9 @@ const ejsMate = require("ejs-mate");
 const listingRoutes = require("./routes/listing");
 const reviewRoutes = require("./routes/reviews");
 const userRoutes = require("./routes/user.js");
-const session = require("express-session");
 const flash = require("connect-flash");
-const passport = require("passport");
-const LocalStrategy = require("passport-local");
-const User = require("./models/user.js");
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
 
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
@@ -22,6 +20,16 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(cookieParser());
+app.use(
+  session({
+    secret: "aayuiscool",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 },
+  })
+);
+app.use(flash());
 
 main()
   .then(() => console.log("Connection to MongoDB Successful!"))
@@ -37,30 +45,26 @@ app.get("/", (req, res) => {
   res.send("root is working");
 });
 
-app.use(
-  session({
-    secret: "aayuiscool",
-    saveUninitialized: true,
-    resave: false,
-    cookie: {
-      expires: Date.now() + 7 * 24 * 60 * 60 * 1000, //(time in milliseconds from the present date)
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-    },
-  })
-);
-
-app.use(flash());
-app.use(passport.initialize());
-app.use(passport.session());
-passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+app.use((req, res, next) => {
+  const token = req.cookies.token;
+  if (token) {
+    try {
+      const jwt = require("jsonwebtoken");
+      const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+      const decoded = jwt.verify(token, JWT_SECRET);
+      res.locals.user = decoded;
+    } catch (err) {
+      res.locals.user = null;
+    }
+  } else {
+    res.locals.user = null;
+  }
+  next();
+});
 
 app.use((req, res, next) => {
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
-  res.locals.user = req.user;
+  res.locals.success = req.flash("success") || "";
+  res.locals.error = req.flash("error") || "";
   next();
 });
 

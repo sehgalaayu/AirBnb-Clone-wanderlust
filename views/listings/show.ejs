@@ -28,7 +28,7 @@
     <!-- Action Buttons -->
     <div class="row">
       <div class="col-md-8 offset-md-2 d-flex justify-content-between">
-        <% if (user && listing.owner && user._id.toString() === listing.owner._id.toString()) { %>
+        <% if (user && listing.owner && user.id && listing.owner._id && user.id.toString() === listing.owner._id.toString()) { %>
           <a href="/listings/<%= listing._id %>/edit" class="btn btn-warning">Edit</a>
           <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST" style="display:inline;">
             <button class="btn btn-danger">Delete</button>

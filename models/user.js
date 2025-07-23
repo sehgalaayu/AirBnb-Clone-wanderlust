@@ -1,14 +1,35 @@
 const { default: mongoose } = require("mongoose");
 const moongose = require("mongoose");
 const Schema = moongose.Schema;
-const passportLocalMongoose = require("passport-local-mongoose");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new Schema({
   email: {
     type: String,
     required: true,
-  }, //username and password(hashed and salted) are automatically added by passport-local-monggose so we are not adding their fields here
+  },
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6,
+  },
 });
 
-userSchema.plugin(passportLocalMongoose);
+// Hash password before saving
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+// Method to validate password
+userSchema.methods.validatePassword = async function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
 module.exports = mongoose.model("User", userSchema);
