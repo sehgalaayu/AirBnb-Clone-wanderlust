@@ -1,6 +1,5 @@
-const { default: mongoose } = require("mongoose");
-const moongose = require("mongoose");
-const Schema = moongose.Schema;
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 const bcrypt = require("bcryptjs");
 
 const userSchema = new Schema({
@@ -29,6 +28,7 @@ userSchema.pre("save", async function (next) {
 
 // Method to validate password
 userSchema.methods.validatePassword = async function (candidatePassword) {
+  if (!this.password) return false;
   return bcrypt.compare(candidatePassword, this.password);
 };
 

@@ -44,8 +44,15 @@
       <h4>Leave a review</h4>
       <form action="/listings/<%= listing.id %>/reviews" method="post" novalidate class="needs-validation">
         <div class="mb-3 mt-3">
-          <label for="rating" class="form-label">Review</label>
-          <input type="range" class="form-range" min="1" max="5" name="review[rating]" id="rating">
+          <label for="rating" class="form-label">Rating</label>
+          <div id="star-rating" class="star-rating">
+            <input type="hidden" name="review[rating]" id="rating-value" value="0">
+            <span class="star" data-value="1">&#9733;</span>
+            <span class="star" data-value="2">&#9733;</span>
+            <span class="star" data-value="3">&#9733;</span>
+            <span class="star" data-value="4">&#9733;</span>
+            <span class="star" data-value="5">&#9733;</span>
+          </div>
         </div>
         <div class="mb-3 mt-3">
           <label for="comment" class="form-label">Comments</label>
@@ -66,17 +73,14 @@
           <% function getMembershipDuration() { const years = ["2 months", "1 year", "2 years", "6 months"]; return years[Math.floor(Math.random() * years.length)]; } %>
       
           <% listing.reviews.forEach(function(review) { %>
-            <% const reviewer = getRandomName(); %>
-            <% const memberFor = getMembershipDuration(); %>
             <div class="col">
               <div class="card h-100 p-3 border-0 shadow-sm">
                 <div class="d-flex align-items-center mb-2">
                   <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3" style="width:48px; height:48px; font-size:1.5rem;">
-                    <%= reviewer[0] %>
+                    <%= review.author && review.author.username ? review.author.username[0].toUpperCase() : '?' %>
                   </div>
                   <div>
-                    <div class="fw-bold"><%= reviewer %></div>
-                    <div class="text-muted small"><%= memberFor %> on Airbnb</div>
+                    <div class="fw-bold"><%= review.author && review.author.username ? review.author.username : 'Unknown' %></div>
                   </div>
                 </div>
                 <div class="mb-2">
@@ -114,3 +118,47 @@
     </div>
   </div>
 </body>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('#star-rating .star');
+    const ratingValue = document.getElementById('rating-value');
+    let selected = 0;
+    stars.forEach(star => {
+      star.addEventListener('mouseover', function() {
+        const val = parseInt(this.getAttribute('data-value'));
+        highlightStars(val);
+      });
+      star.addEventListener('mouseout', function() {
+        highlightStars(selected);
+      });
+      star.addEventListener('click', function() {
+        selected = parseInt(this.getAttribute('data-value'));
+        ratingValue.value = selected;
+        highlightStars(selected);
+      });
+    });
+    function highlightStars(rating) {
+      stars.forEach(star => {
+        if (parseInt(star.getAttribute('data-value')) <= rating) {
+          star.classList.add('selected');
+        } else {
+          star.classList.remove('selected');
+        }
+      });
+    }
+  });
+</script>
+<style>
+  .star-rating .star {
+    font-size: 2rem;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .star-rating .star.selected,
+  .star-rating .star:hover,
+  .star-rating .star:hover ~ .star {
+    color: #ffc107;
+  }
+</style>
