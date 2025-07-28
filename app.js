@@ -13,6 +13,8 @@ const userRoutes = require("./routes/user.js");
 const flash = require("connect-flash");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");

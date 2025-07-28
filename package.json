@@ -21,6 +21,7 @@
     "method-override": "^3.0.0",
     "mongodb": "^6.18.0",
     "mongoose": "^8.15.0",
+    "multer": "^2.0.2",
     "zod": "^4.0.5"
   }
 }
