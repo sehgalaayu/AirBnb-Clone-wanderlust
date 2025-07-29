@@ -17,7 +17,8 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
+const { storage } = require("../cloudconfig.js");
+const upload = multer({ storage });
 
 function isLoggedIn(req, res, next) {
   const token = req.cookies.token;
@@ -68,7 +69,9 @@ router
   .get(wrapAsync(getAllListings))
   .post(
     isLoggedIn,
-    upload.single("listing[image]"),
+    upload.single("listing[image]", (req, res) => {
+      res.send(req.file);
+    }),
     validateListing,
     wrapAsync(createListing)
   );

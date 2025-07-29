@@ -1,6 +1,6 @@
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+const JWT_SECRET = "supersecretkey";
 
 // Render signup form
 const renderSignup = (req, res) => {
@@ -14,7 +14,11 @@ const signup = async (req, res, next) => {
     const user = new User({ username, email, password });
     await user.save();
     // Generate JWT
-    const token = jwt.sign({ id: user._id, username: user.username }, JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(
+      { id: user._id, username: user.username },
+      JWT_SECRET,
+      { expiresIn: "1h" }
+    );
     res.cookie("token", token, { httpOnly: true, maxAge: 3600000 });
     req.flash("success", "Welcome to Wanderlust!");
     res.redirect("/listings");
@@ -40,7 +44,11 @@ const login = async (req, res) => {
     return res.render("auth/login", { error: "Invalid username or password." });
   }
   // Generate JWT
-  const token = jwt.sign({ id: user._id, username: user.username }, JWT_SECRET, { expiresIn: "1h" });
+  const token = jwt.sign(
+    { id: user._id, username: user.username },
+    JWT_SECRET,
+    { expiresIn: "1h" }
+  );
   res.cookie("token", token, { httpOnly: true, maxAge: 3600000 });
   req.flash("success", "Welcome back!");
   res.redirect("/listings");
@@ -59,4 +67,4 @@ module.exports = {
   renderLogin,
   login,
   logout,
-}; 
+};
