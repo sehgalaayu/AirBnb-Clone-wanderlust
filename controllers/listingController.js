@@ -25,7 +25,7 @@ const showListing = async (req, res) => {
     const listing = await Listing.findById(req.params.id)
       .populate({
         path: "reviews",
-        populate: { path: "author", select: "username" }
+        populate: { path: "author", select: "username" },
       })
       .populate("owner");
     if (!listing) {
@@ -54,8 +54,12 @@ const renderEditForm = async (req, res) => {
 
 // Create a new listing
 const createListing = async (req, res, next) => {
+  let url = req.file.path;
+  let filename = req.file.filename;
+  console.log(url + " " + filename);
   const newListing = new Listing(req.body.listing);
   newListing.owner = req.user.id;
+  newListing.image = { url, filename };
   await newListing.save();
   req.flash("success", "Listing Created successfully!");
   res.redirect("/listings");
@@ -64,11 +68,37 @@ const createListing = async (req, res, next) => {
 // Update a listing
 const updateListing = async (req, res) => {
   try {
+    const { id } = req.params;
+    const listing = await Listing.findById(id);
+    
+    if (!listing) {
+      req.flash("error", "Listing not found");
+      return res.redirect("/listings");
+    }
+
+    // Handle image update
+    if (req.file) {
+      // New file uploaded
+      const url = req.file.path;
+      const filename = req.file.filename;
+      req.body.listing.image = { url, filename };
+    } else if (req.body.listing.image && req.body.listing.image.url) {
+      // URL provided but no file uploaded
+      req.body.listing.image = { 
+        url: req.body.listing.image.url,
+        filename: listing.image ? listing.image.filename : null 
+      };
+    } else {
+      // No new image provided, keep existing image
+      req.body.listing.image = listing.image;
+    }
+
     const updatedListing = await Listing.findByIdAndUpdate(
-      req.params.id,
+      id,
       req.body.listing,
       { new: true }
     );
+    
     req.flash("success", "Listing Updated!");
     res.redirect(`/listings/${updatedListing._id}`);
   } catch (err) {
@@ -97,4 +127,4 @@ module.exports = {
   createListing,
   updateListing,
   deleteListing,
-}; 
+};

@@ -69,9 +69,7 @@ router
   .get(wrapAsync(getAllListings))
   .post(
     isLoggedIn,
-    upload.single("listing[image]", (req, res) => {
-      res.send(req.file);
-    }),
+    upload.single("listing[image]"),
     validateListing,
     wrapAsync(createListing)
   );
@@ -91,6 +89,7 @@ router
   .put(
     isLoggedIn,
     wrapAsync(isOwner),
+    upload.single("listing[image]"),
     validateListing,
     wrapAsync(updateListing)
   )

@@ -4,7 +4,7 @@
     <br><br>
     <h1>Edit Listing</h1>
 
-    <form method="post" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation">
+    <form method="post" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
       <div class="mb-3">
         <label for="title" class="form-label">Title:</label>
         <input
@@ -39,16 +39,44 @@
           </div>
       </div>
 
+      <!-- Current Image Display -->
       <div class="mb-3">
-        <label for="image" class="form-label">Image URL:</label>
+        <label class="form-label">Current Image:</label>
+        <div class="current-image-container">
+          <% if (listing.image && listing.image.url) { %>
+            <img src="<%= listing.image.url %>" alt="Current listing image" class="img-thumbnail" style="max-width: 300px; max-height: 200px; object-fit: cover;">
+            <p class="text-muted mt-2">Current listing image</p>
+          <% } else { %>
+            <p class="text-muted">No image currently uploaded</p>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Image Upload Section -->
+      <div class="mb-3">
+        <label for="image" class="form-label">Upload New Image:</label>
+        <input
+          type="file"
+          id="image"
+          name="listing[image]"
+          class="form-control"
+          accept="image/*"
+        />
+        <div class="form-text">Choose a new image to replace the current one</div>
+      </div>
+
+      <!-- Image URL Section (Alternative) -->
+      <div class="mb-3">
+        <label for="imageUrl" class="form-label">Or Enter Image URL:</label>
         <input
           type="text"
-          id="image"
+          id="imageUrl"
           name="listing[image][url]"
           class="form-control"
-          placeholder="Enter image URL"
-          value="<%= listing.image.url %>"
+          placeholder="Enter image URL (if not uploading a file)"
+          value="<%= listing.image && listing.image.url ? listing.image.url : '' %>"
         />
+        <div class="form-text">Provide an image URL as an alternative to file upload</div>
       </div>
 
       <div class="row">
