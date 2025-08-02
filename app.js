@@ -26,24 +26,30 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cookieParser());
-app.use(
-  session({
-    store: MongoStore.create({
-      mongoUrl: MONGO_URL,
-      crypto: {
-        secret: process.env.SESSION_SECRET || "aayuiscool"
-      }
-    }),
-    secret: process.env.SESSION_SECRET || "aayuiscool",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-      httpOnly: true, 
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      secure: process.env.NODE_ENV === "production"
+
+// Session configuration
+const sessionConfig = {
+  store: MongoStore.create({
+    mongoUrl: MONGO_URL,
+    crypto: {
+      secret: process.env.SESSION_SECRET || "aayuiscool"
     },
-  })
-);
+    touchAfter: 24 * 3600, // Only update session once per day
+    ttl: 14 * 24 * 3600 // Session TTL (14 days)
+  }),
+  secret: process.env.SESSION_SECRET || "aayuiscool",
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    httpOnly: true, 
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    secure: false, // Set to false for now to test
+    sameSite: "lax" // Use lax for better compatibility
+  },
+  name: 'sessionId' // Custom session name
+};
+
+app.use(session(sessionConfig));
 app.use(flash());
 
 main()
@@ -60,6 +66,37 @@ app.get("/", (req, res) => {
   res.redirect("/listings");
 });
 
+// Test route for flash messages
+app.get("/test-flash", (req, res) => {
+  req.flash("success", "This is a test success message!");
+  req.flash("error", "This is a test error message!");
+  res.redirect("/listings");
+});
+
+// Debug route to check environment and session
+app.get("/debug", (req, res) => {
+  res.json({
+    nodeEnv: process.env.NODE_ENV,
+    hasSessionSecret: !!process.env.SESSION_SECRET,
+    hasJwtSecret: !!process.env.JWT_SECRET,
+    sessionId: req.sessionID,
+    flashSuccess: req.flash("success"),
+    flashError: req.flash("error"),
+    sessionStore: req.sessionStore ? "MongoDB" : "Memory"
+  });
+});
+
+// Debug route to check authentication
+app.get("/debug-auth", (req, res) => {
+  const token = req.cookies.token;
+  res.json({
+    hasToken: !!token,
+    tokenLength: token ? token.length : 0,
+    user: res.locals.user,
+    cookies: req.cookies
+  });
+});
+
 app.use((req, res, next) => {
   const token = req.cookies.token;
   if (token) {
@@ -68,8 +105,11 @@ app.use((req, res, next) => {
       const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
       const decoded = jwt.verify(token, JWT_SECRET);
       res.locals.user = decoded;
+      console.log("✅ User authenticated:", decoded.username);
     } catch (err) {
+      console.log("❌ JWT verification failed:", err.message);
       res.locals.user = null;
+      res.clearCookie("token"); // Clear invalid token
     }
   } else {
     res.locals.user = null;
@@ -78,8 +118,8 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  res.locals.success = req.flash("success") || "";
-  res.locals.error = req.flash("error") || "";
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
   next();
 });
 

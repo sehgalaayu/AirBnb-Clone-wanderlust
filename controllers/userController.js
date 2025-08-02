@@ -1,6 +1,6 @@
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = "supersecretkey";
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
 // Render signup form
 const renderSignup = (req, res) => {
@@ -17,9 +17,14 @@ const signup = async (req, res, next) => {
     const token = jwt.sign(
       { id: user._id, username: user.username },
       JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "7d" }
     );
-    res.cookie("token", token, { httpOnly: true, maxAge: 3600000 });
+    res.cookie("token", token, { 
+      httpOnly: true, 
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax"
+    });
     req.flash("success", "Welcome to Wanderlust!");
     res.redirect("/listings");
   } catch (e) {
@@ -47,9 +52,14 @@ const login = async (req, res) => {
   const token = jwt.sign(
     { id: user._id, username: user.username },
     JWT_SECRET,
-    { expiresIn: "1h" }
+    { expiresIn: "7d" }
   );
-  res.cookie("token", token, { httpOnly: true, maxAge: 3600000 });
+  res.cookie("token", token, { 
+    httpOnly: true, 
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax"
+  });
   req.flash("success", "Welcome back!");
   res.redirect("/listings");
 };

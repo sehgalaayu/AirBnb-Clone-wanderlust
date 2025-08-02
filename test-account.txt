@@ -1,0 +1,2 @@
+   Email: admin@wanderlust.com
+   Password: password123

@@ -1,7 +1,8 @@
-<% if (success && success.length) { %>
+<% if (success && success.length > 0) { %>
 <div
   class="alert alert-success alert-dismissible fade show col-6 offset-3"
   role="alert"
+  id="success-flash"
 >
   <button
     type="button"
@@ -9,12 +10,15 @@
     data-bs-dismiss="alert"
     aria-label="Close"
   ></button>
-  <%= success%>
+  <%= success %>
 </div>
-<% } %> <% if (error && error.length) { %>
+<% } %> 
+
+<% if (error && error.length > 0) { %>
 <div
   class="alert alert-danger alert-dismissible fade show col-6 offset-3"
   role="alert"
+  id="error-flash"
 >
   <button
     type="button"
@@ -22,6 +26,26 @@
     data-bs-dismiss="alert"
     aria-label="Close"
   ></button>
-  <%= error%>
+  <%= error %>
 </div>
 <% } %>
+
+<script>
+// Auto-hide flash messages after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+  const flashMessages = document.querySelectorAll('.alert');
+  flashMessages.forEach(function(message) {
+    setTimeout(function() {
+      if (message && message.parentNode) {
+        message.style.transition = 'opacity 0.5s ease-out';
+        message.style.opacity = '0';
+        setTimeout(function() {
+          if (message.parentNode) {
+            message.parentNode.removeChild(message);
+          }
+        }, 500);
+      }
+    }, 5000);
+  });
+});
+</script>
