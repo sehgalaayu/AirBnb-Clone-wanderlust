@@ -53,13 +53,19 @@ async function isOwner(req, res, next) {
 // Middleware to validate listing data
 const validateListing = (req, res, next) => {
   try {
-    listingSchemaZod.parse(req.body);
+    console.log("Validating listing data:", JSON.stringify(req.body, null, 2));
+    const result = listingSchemaZod.safeParse(req.body);
+    
+    if (!result.success) {
+      console.log("Validation errors:", result.error.errors);
+      const errorMessage = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+      throw new ExpressError(400, errorMessage);
+    }
+    
     next();
   } catch (err) {
-    const errorMessage =
-      err.errors && err.errors.length > 0
-        ? err.errors[0].message
-        : "Invalid data";
+    console.error("Validation error:", err);
+    const errorMessage = err.message || "Invalid data";
     throw new ExpressError(400, errorMessage);
   }
 };
@@ -69,6 +75,12 @@ router
   .get(wrapAsync(getAllListings))
   .post(
     isLoggedIn,
+    (req, res, next) => {
+      console.log("Raw form data received:");
+      console.log("Content-Type:", req.headers['content-type']);
+      console.log("Body keys:", Object.keys(req.body));
+      next();
+    },
     upload.single("listing[image]"),
     validateListing,
     wrapAsync(createListing)

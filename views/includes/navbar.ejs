@@ -1,30 +1,463 @@
-<nav class="navbar navbar-expand-md bg-body-tertiary border-bottom sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#"><i class="fa-regular fa-compass"></i></a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarNavAltMarkup"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-link" href="/">Home</a>
-        <a class="nav-link" href="/listings">All Listings</a>
-        <% if (user) { %>
-          <a class="nav-link" href="/listings/new">Create Listing</a>
-        <% } %>
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top shadow-sm padding-top-10">
+  <div class="container-fluid px-4 py-2">
+    <!-- Logo -->
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <div class="airbnb-logo">
+        <i class="fa-solid fa-compass text-danger"></i>
+        <span class="ms-2 fw-bold text-dark">Wanderlust</span>
       </div>
-      <div class="navbar-nav ms-auto">
-        <% if (!user) { %>
-          <a class="nav-link" href="/signup"><b>Sign up</b></a>
-          <a class="nav-link" href="/login"><b>Login</b></a>
-        <% } else { %>
-          <a class="nav-link" href="/logout">Logout</a>
-        <% } %>
+    </a>
+
+    <!-- Search Bar - Desktop -->
+    <div class="search-container d-none d-lg-flex">
+      <div class="search-bar">
+        <div class="search-item">
+          <i class="fa-solid fa-house text-muted"></i>
+          <span class="ms-2">Anywhere</span>
+        </div>
+        <div class="search-divider"></div>
+        <div class="search-item">
+          <i class="fa-solid fa-calendar text-muted"></i>
+          <span class="ms-2">Anytime</span>
+        </div>
+        <div class="search-divider"></div>
+        <div class="search-item">
+          <i class="fa-solid fa-user text-muted"></i>
+          <span class="ms-2">Add guests</span>
+        </div>
+        <button class="search-button" onclick="toggleSearchInput()">
+          <i class="fa-solid fa-magnifying-glass text-white"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Side Menu -->
+    <div class="navbar-nav ms-auto d-flex align-items-center">
+      <!-- Price Toggle -->
+      <div class="price-toggle me-4 d-none d-md-block">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="priceToggle">
+          <label class="form-check-label small text-muted" for="priceToggle">
+            Display prices after taxes
+          </label>
+        </div>
+      </div>
+
+      <!-- User Menu -->
+      <div class="dropdown">
+        <button class="btn btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <!-- Mobile Price Toggle -->
+          <li class="d-md-none">
+            <div class="dropdown-item">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="priceToggleMobile">
+                <label class="form-check-label small" for="priceToggleMobile">
+                  Display prices after taxes
+                </label>
+              </div>
+            </div>
+          </li>
+          <li class="d-md-none"><hr class="dropdown-divider"></li>
+          <% if (!user) { %>
+            <li><a class="dropdown-item" href="/signup">Sign up</a></li>
+            <li><a class="dropdown-item" href="/login">Login</a></li>
+          <% } else { %>
+            <li><a class="dropdown-item" href="/listings/new">Create Listing</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="/logout">Logout</a></li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Search Bar -->
+  <div class="container-fluid px-3 d-lg-none">
+    <div class="mobile-search-container mt-2 mb-2">
+      <div class="mobile-search-bar">
+        <div class="mobile-search-item">
+          <i class="fa-solid fa-magnifying-glass text-muted"></i>
+          <span class="ms-2">Search destinations</span>
+        </div>
+        <button class="mobile-search-button" onclick="toggleSearchInput()">
+          <i class="fa-solid fa-filter text-white"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Input Overlay -->
+  <div id="searchOverlay" class="search-overlay">
+    <div class="search-modal">
+      <div class="search-header">
+        <h5 class="mb-0">Search Listings</h5>
+        <button class="btn-close" onclick="toggleSearchInput()"></button>
+      </div>
+      <div class="search-content">
+        <div class="input-group mb-3">
+          <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" class="form-control" id="searchInput" placeholder="Search by title, location, or description...">
+          <button class="btn btn-danger" onclick="performSearch()">Search</button>
+        </div>
+        <div class="search-suggestions">
+          <h6 class="text-muted mb-2">Popular searches:</h6>
+          <div class="suggestion-tags">
+            <span class="badge bg-light text-dark me-2 mb-2" onclick="searchByTag('beach')">Beach</span>
+            <span class="badge bg-light text-dark me-2 mb-2" onclick="searchByTag('mountain')">Mountain</span>
+            <span class="badge bg-light text-dark me-2 mb-2" onclick="searchByTag('city')">City</span>
+            <span class="badge bg-light text-dark me-2 mb-2" onclick="searchByTag('luxury')">Luxury</span>
+            <span class="badge bg-light text-dark me-2 mb-2" onclick="searchByTag('budget')">Budget</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </nav>
+
+<style>
+.airbnb-logo {
+  font-size: 1.5rem;
+}
+
+/* Desktop Search Styles */
+.search-container {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 350px;
+  width: 100%;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 24px;
+  padding: 6px 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  margin: 2px 0;
+}
+
+.search-bar:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  border-color: #d0d0d0;
+}
+
+.search-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 16px;
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.search-item:hover {
+  background-color: #f8f9fa;
+  transform: translateY(-1px);
+}
+
+.search-divider {
+  width: 1px;
+  height: 16px;
+  background-color: #e0e0e0;
+  margin: 0 6px;
+}
+
+.search-button {
+  background: #ff385c;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(255, 56, 92, 0.3);
+}
+
+.search-button:hover {
+  background: #e31c5f;
+  transform: scale(1.05);
+  box-shadow: 0 2px 6px rgba(255, 56, 92, 0.4);
+}
+
+/* Mobile Search Styles */
+.mobile-search-container {
+  width: 100%;
+}
+
+.mobile-search-bar {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  padding: 8px 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.mobile-search-bar:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  border-color: #d0d0d0;
+}
+
+.mobile-search-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  font-weight: 500;
+  flex-grow: 1;
+}
+
+.mobile-search-item:hover {
+  background-color: #f8f9fa;
+}
+
+.mobile-search-button {
+  background: #ff385c;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(255, 56, 92, 0.3);
+  flex-shrink: 0;
+}
+
+.mobile-search-button:hover {
+  background: #e31c5f;
+  transform: scale(1.05);
+  box-shadow: 0 2px 6px rgba(255, 56, 92, 0.4);
+}
+
+.price-toggle {
+  font-size: 0.875rem;
+}
+
+.form-check-input:checked {
+  background-color: #ff385c;
+  border-color: #ff385c;
+}
+
+.navbar {
+  padding: 0.5rem 0;
+  position: relative;
+}
+
+/* Search Overlay Styles */
+.search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1050;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+}
+
+.search-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eee;
+}
+
+.search-content {
+  padding: 24px;
+}
+
+.suggestion-tags {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.suggestion-tags .badge {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.suggestion-tags .badge:hover {
+  background-color: #ff385c !important;
+  color: white !important;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 991.98px) {
+  .search-container {
+    display: none !important;
+  }
+  
+  .price-toggle {
+    display: none;
+  }
+  
+  .navbar {
+    padding: 0.25rem 0;
+  }
+  
+  .container-fluid {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .airbnb-logo {
+    font-size: 1.25rem;
+  }
+  
+  .mobile-search-bar {
+    padding: 6px 10px;
+    border-radius: 18px;
+  }
+  
+  .mobile-search-item {
+    font-size: 0.8rem;
+    padding: 3px 6px;
+  }
+  
+  .mobile-search-button {
+    width: 28px;
+    height: 28px;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const priceToggle = document.getElementById('priceToggle');
+  const priceToggleMobile = document.getElementById('priceToggleMobile');
+  
+  // Load saved state
+  const savedState = localStorage.getItem('priceToggleState');
+  if (savedState === 'true') {
+    if (priceToggle) priceToggle.checked = true;
+    if (priceToggleMobile) priceToggleMobile.checked = true;
+    updatePrices(true);
+  }
+  
+  // Handle desktop toggle change
+  if (priceToggle) {
+    priceToggle.addEventListener('change', function() {
+      const showWithTax = this.checked;
+      localStorage.setItem('priceToggleState', showWithTax);
+      if (priceToggleMobile) priceToggleMobile.checked = showWithTax;
+      updatePrices(showWithTax);
+    });
+  }
+  
+  // Handle mobile toggle change
+  if (priceToggleMobile) {
+    priceToggleMobile.addEventListener('change', function() {
+      const showWithTax = this.checked;
+      localStorage.setItem('priceToggleState', showWithTax);
+      if (priceToggle) priceToggle.checked = showWithTax;
+      updatePrices(showWithTax);
+    });
+  }
+  
+  function updatePrices(showWithTax) {
+    const priceElements = document.querySelectorAll('.listing-price');
+    priceElements.forEach(element => {
+      const originalPrice = element.getAttribute('data-original-price');
+      if (originalPrice) {
+        if (showWithTax) {
+          const priceWithTax = Math.round(parseFloat(originalPrice) * 1.18);
+          element.textContent = `₹ ${priceWithTax.toLocaleString("en-IN")} + 18% GST`;
+        } else {
+          element.textContent = `₹ ${parseFloat(originalPrice).toLocaleString("en-IN")}`;
+        }
+      }
+    });
+  }
+});
+
+// Search functionality
+function toggleSearchInput() {
+  const overlay = document.getElementById('searchOverlay');
+  if (overlay.style.display === 'flex') {
+    overlay.style.display = 'none';
+  } else {
+    overlay.style.display = 'flex';
+    document.getElementById('searchInput').focus();
+  }
+}
+
+function performSearch() {
+  const searchTerm = document.getElementById('searchInput').value.trim();
+  if (searchTerm) {
+    // Redirect to listings with search parameter
+    window.location.href = `/listings?search=${encodeURIComponent(searchTerm)}`;
+  } else {
+    // Just redirect to listings if no search term
+    window.location.href = '/listings';
+  }
+  toggleSearchInput();
+}
+
+function searchByTag(tag) {
+  document.getElementById('searchInput').value = tag;
+  performSearch();
+}
+
+// Close search overlay when clicking outside
+document.addEventListener('click', function(event) {
+  const overlay = document.getElementById('searchOverlay');
+  const modal = document.querySelector('.search-modal');
+  
+  if (event.target === overlay) {
+    toggleSearchInput();
+  }
+});
+
+// Handle Enter key in search input
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter' && document.getElementById('searchInput').matches(':focus')) {
+    performSearch();
+  }
+});
+</script>

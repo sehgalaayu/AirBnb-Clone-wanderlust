@@ -5,8 +5,8 @@ if (process.env.NODE_ENV != "production") {
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const PORT = 8080;
-const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
+const PORT = process.env.PORT || 8080;
+const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/wanderlust";
 const path = require("path");
 const methodOverride = require("method-override");
 const ExpressError = require("./utils/ExpressError");
@@ -17,6 +17,7 @@ const userRoutes = require("./routes/user.js");
 const flash = require("connect-flash");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
+const MongoStore = require("connect-mongo");
 
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
@@ -27,10 +28,20 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(cookieParser());
 app.use(
   session({
-    secret: "aayuiscool",
+    store: MongoStore.create({
+      mongoUrl: MONGO_URL,
+      crypto: {
+        secret: process.env.SESSION_SECRET || "aayuiscool"
+      }
+    }),
+    secret: process.env.SESSION_SECRET || "aayuiscool",
     resave: false,
     saveUninitialized: false,
-    cookie: { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 },
+    cookie: { 
+      httpOnly: true, 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === "production"
+    },
   })
 );
 app.use(flash());
@@ -43,10 +54,10 @@ async function main() {
   await mongoose.connect(MONGO_URL);
 }
 
-app.listen(PORT, () => console.log("app is listening on Port 8080"));
+app.listen(PORT, () => console.log(`app is listening on Port ${PORT}`));
 
 app.get("/", (req, res) => {
-  res.send("root is working");
+  res.redirect("/listings");
 });
 
 app.use((req, res, next) => {

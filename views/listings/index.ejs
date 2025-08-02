@@ -1,25 +1,154 @@
 <% layout('layouts/boilerplate') -%>
 <body>
-  <h1>All Listings</h1>
-  <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
-    <% for(let listing of allListings) { %>
-    <div class="card col">
-      <a href="/listings/<%= listing._id  %>" class="listing-link">
-        <img
-          src="<%= listing.image.url%>"
-          class="card-img-top"
-          alt="listing_image"
-          style="height: 20rem"
-        />
-      </a>
-      <div class="card-img-overlay"></div>
-      <div class="card-body">
-        <p class="card-text">
-          <b><%= listing.title %> </b><br />
-          &#8377;<%= listing.price.toLocaleString("en-IN") %> /night
-        </p>
+  <div class="container mt-4">
+    <% if (searchTerm) { %>
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="alert alert-info d-flex align-items-center">
+            <i class="fa-solid fa-magnifying-glass me-2"></i>
+            <span>Search results for "<strong><%= searchTerm %></strong>" (<%= allListings.length %> listings found)</span>
+            <a href="/listings" class="btn btn-sm btn-outline-secondary ms-auto">Clear Search</a>
+          </div>
+        </div>
       </div>
-    </div>
+    <% } %>
+    
+    <h1 class="mb-4">All Listings</h1>
+    
+    <% if (allListings.length > 0) { %>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        <% for(let listing of allListings) { %>
+        <div class="col">
+          <div class="card h-100 listing-card">
+            <a href="/listings/<%= listing._id %>" class="listing-link">
+              <div class="card-img-container">
+                <img
+                  src="<%= listing.image.url %>"
+                  class="card-img-top"
+                  alt="<%= listing.title %>"
+                  onerror="this.src='/new-listing.jpg'"
+                />
+              </div>
+            </a>
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title"><%= listing.title %></h5>
+              <p class="card-text text-muted mb-2">
+                <i class="fa-solid fa-location-dot me-1"></i>
+                <%= listing.location %>, <%= listing.country %>
+              </p>
+              <div class="mt-auto">
+                <span class="listing-price fw-bold" data-original-price="<%= listing.price %>">
+                  ₹<%= listing.price.toLocaleString("en-IN") %> /night
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <% } %>
+      </div>
+    <% } else { %>
+      <div class="text-center mt-5">
+        <i class="fa-solid fa-search fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">No listings found</h4>
+        <p class="text-muted">Try adjusting your search terms or browse all listings</p>
+        <a href="/listings" class="btn btn-primary">View All Listings</a>
+      </div>
     <% } %>
   </div>
+
+  <style>
+    .listing-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .listing-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .listing-link {
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .listing-link:hover {
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .card-img-container {
+      position: relative;
+      overflow: hidden;
+      height: 200px;
+    }
+    
+    .card-img-top {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    
+    .listing-card:hover .card-img-top {
+      transform: scale(1.05);
+    }
+    
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    
+    .card-text {
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    
+    .listing-price {
+      font-size: 1.1rem;
+      color: #ff385c;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 575.98px) {
+      .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+      
+      .card-img-container {
+        height: 180px;
+      }
+      
+      .card-title {
+        font-size: 1rem;
+      }
+      
+      .listing-price {
+        font-size: 1rem;
+      }
+    }
+    
+    @media (min-width: 576px) and (max-width: 767.98px) {
+      .card-img-container {
+        height: 190px;
+      }
+    }
+    
+    @media (min-width: 768px) and (max-width: 991.98px) {
+      .card-img-container {
+        height: 200px;
+      }
+    }
+    
+    @media (min-width: 992px) {
+      .card-img-container {
+        height: 220px;
+      }
+    }
+  </style>
 </body>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Test Map</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.js"></script>
+<style>
+body { margin: 0; padding: 20px; }
+#map { height: 400px; width: 100%; border-radius: 8px; }
+</style>
+</head>
+<body>
+<h1>Map Test</h1>
+<div id="map"></div>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1Ijoic2VoZ2FsYWF5dSIsImEiOiJjbWRzczNyeTEwMWYwMmtzaWd5dmVsdmI4In0.DE0varrK5nQbsEKShLJWIg';
+const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: [78.9629, 20.5937], // India
+    zoom: 5
+});
+
+// Add navigation controls
+map.addControl(new mapboxgl.NavigationControl());
+
+// Add a test marker
+new mapboxgl.Marker()
+    .setLngLat([78.9629, 20.5937])
+    .addTo(map);
+
+// Add popup
+new mapboxgl.Popup({ offset: 25 })
+    .setLngLat([78.9629, 20.5937])
+    .setHTML('<h6>Test Location</h6><p>New Delhi, India</p>')
+    .addTo(map);
+</script>
+</body>
+</html> 

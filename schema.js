@@ -7,11 +7,12 @@ const listingSchemaZod = z.object({
     price: z.preprocess((val) => Number(val), z.number().min(0, "Price must be positive")),
     location: z.string().min(1, "Location is required"),
     country: z.string().min(1, "Country is required"),
-    image: z.object({
-      url: z.string().optional().nullable(),
-      filename: z.string().optional().nullable(),
-    }).optional(),
-  })
+  }),
+  imageUrl: z.string().optional(),
+  geometry: z.object({
+    type: z.string().optional(),
+    coordinates: z.array(z.number()).optional(),
+  }).optional(),
 });
 
 const reviewSchemaZod = z.object({

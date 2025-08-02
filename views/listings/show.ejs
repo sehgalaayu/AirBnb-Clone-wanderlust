@@ -20,10 +20,30 @@
     <!-- Price and Description -->
     <div class="row mb-4">
       <div class="col-md-8 offset-md-2">
-        <h4 class="text-danger mb-3">₹ <%= listing.price.toLocaleString("en-IN") %></h4>
+        <h4 class="text-danger mb-3 listing-price" data-original-price="<%= listing.price %>">
+          ₹ <%= listing.price.toLocaleString("en-IN") %>
+        </h4>
         <p class="lead"><%= listing.description %></p>
       </div>
     </div>
+
+    <!-- Map Section -->
+    <% if (listing.geometry && listing.geometry.coordinates && listing.geometry.coordinates.length === 2) { %>
+    <div class="row mb-4">
+      <div class="col-md-8 offset-md-2">
+        <h5 class="mb-3">Location</h5>
+        <div id="map" style="height: 400px; width: 100%; border-radius: 8px; margin-bottom: 10px;"></div>
+        <p class="text-muted small">Coordinates: <%= listing.geometry.coordinates[0] %>, <%= listing.geometry.coordinates[1] %></p>
+      </div>
+    </div>
+    <% } else { %>
+    <div class="row mb-4">
+      <div class="col-md-8 offset-md-2">
+        <h5 class="mb-3">Location</h5>
+        <p class="text-muted">Location coordinates not available for this listing.</p>
+      </div>
+    </div>
+    <% } %>
 
     <!-- Action Buttons -->
     <div class="row">
@@ -118,6 +138,41 @@
     </div>
   </div>
 </body>
+
+<!-- Mapbox CSS and JS for show page -->
+<% if (listing.geometry && listing.geometry.coordinates && listing.geometry.coordinates.length === 2) { %>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.js"></script>
+
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1Ijoic2VoZ2FsYWF5dSIsImEiOiJjbWRzczNyeTEwMWYwMmtzaWd5dmVsdmI4In0.DE0varrK5nQbsEKShLJWIg';
+  
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: [<%- listing.geometry.coordinates[0] %>, <%- listing.geometry.coordinates[1] %>],
+    zoom: 12
+  });
+
+  // Add navigation controls
+  map.addControl(new mapboxgl.NavigationControl());
+
+  // Add marker for the listing location
+  new mapboxgl.Marker()
+    .setLngLat([<%- listing.geometry.coordinates[0] %>, <%- listing.geometry.coordinates[1] %>])
+    .addTo(map);
+
+  // Add popup with listing information
+  new mapboxgl.Popup({ offset: 25 })
+    .setLngLat([<%- listing.geometry.coordinates[0] %>, <%- listing.geometry.coordinates[1] %>])
+    .setHTML(`
+      <h6><%= listing.title %></h6>
+      <p class="mb-1"><%= listing.location %>, <%= listing.country %></p>
+      <p class="mb-0 text-danger listing-price" data-original-price="<%= listing.price %>">₹ <%= listing.price.toLocaleString("en-IN") %></p>
+    `)
+    .addTo(map);
+</script>
+<% } %>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
