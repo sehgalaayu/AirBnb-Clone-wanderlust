@@ -5,7 +5,7 @@ A full-stack web application inspired by Airbnb, built with modern web technolog
 ## 📸 Screenshots
 
 ### Home Page
-![Home Page](public/home-page.jpg)
+![Home Page](public/home-page.JPG)
 
 ### New Listing Page
 ![New Listing Page](public/new-listing.jpg)
